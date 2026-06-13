@@ -20,7 +20,7 @@ Built with plain **HTML, CSS, and vanilla JavaScript** — no dependencies, no b
 ## 🧮 Scoring Rules
 
 | Situation | Points |
-|---|---|
+| --- | --- |
 | Valid answer, unique | **+1** |
 | Valid answer, duplicated by another player | **0** |
 | Golden Answer, unique | **+2** (+1 unique bonus, +1 golden bonus) |
@@ -34,7 +34,9 @@ Built with plain **HTML, CSS, and vanilla JavaScript** — no dependencies, no b
 - Players can have negative total scores.
 
 ### 🥇 Tie-Breaker Rules
+
 If two or more players are tied on total score at the end of the game:
+
 1. The player with the **most Golden Answers** wins.
 2. If still tied, the player with the **fewest cancelled (duplicated-valid) answers** wins.
 3. If still tied, the result is a shared win.
@@ -62,7 +64,7 @@ Golden/Forbidden answers and valid answer lists are hardcoded per question and n
 
 ## 🚀 Running the Game
 
-No installation needed — just open `trivia_game.html` in any modern web browser (Chrome, Firefox, Safari, Edge).
+No installation needed — just open `index.html` in any modern web browser (Chrome, Firefox, Safari, Edge).
 
 ```bash
 # Clone the repo
@@ -70,8 +72,22 @@ git clone https://github.com/<your-username>/golden-forbidden-trivia.git
 cd golden-forbidden-trivia
 
 # Open in your browser
-open trivia_game.html   # macOS
-# or just double-click the file
+open index.html   # macOS
+# or just double-click index.html on Windows/Linux
+```
+
+---
+
+## 🗂 Project Structure
+
+```text
+trivia_game/
+├── index.html   # Entry point — loads all scripts
+├── style.css    # All styles (dark theme, RTL, responsive)
+├── data.js      # Question bank (QUESTIONS array)
+├── game.js      # Game state and scoring logic
+├── ui.js        # DOM rendering for all screens
+└── main.js      # Bootstrap — calls render() to start
 ```
 
 ---
@@ -80,7 +96,7 @@ open trivia_game.html   # macOS
 
 - HTML5
 - CSS3 (custom properties, RTL support)
-- Vanilla JavaScript (no frameworks)
+- Vanilla JavaScript (no frameworks, no build tools)
 
 ---
 
