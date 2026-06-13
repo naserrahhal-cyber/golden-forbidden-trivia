@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة الإجابات الذهبية والمحظورة</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+  :root{
+    --bg: #0f1420;
+    --bg-soft: #161d2e;
+    --card: #1c2538;
+    --card-border: #2c3a55;
+    --text: #eef1f7;
+    --text-dim: #9aa6bf;
+    --gold: #f0c14b;
+    --gold-dark: #b8860b;
+    --forbidden: #e85d5d;
+    --ok: #4cd9a8;
+    --accent: #6c8cff;
+    --radius: 16px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{ height:100%; }
+
+  body{
+    margin:0;
+    font-family: 'Cairo', system-ui, sans-serif;
+    background: radial-gradient(circle at 50% -10%, #243355 0%, var(--bg) 55%);
+    color: var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+  }
+
+  .app{
+    width:100%;
+    max-width: 720px;
+  }
+
+  .title{
+    text-align:center;
+    font-weight:900;
+    font-size: 28px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, var(--gold), #fff7d6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .subtitle{
+    text-align:center;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    font-size: 14px;
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 30px -15px rgba(0,0,0,.6);
+  }
+
+  h2{
+    margin: 0 0 16px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .players-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom: 16px;
+  }
+  .player-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+  .player-row .num{
+    width: 26px; height:26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px; font-weight:700;
+    flex-shrink:0;
+  }
+  .player-row span.pname{ flex:1; font-weight:600; }
+  .remove-btn{
+    background: none; border:none; color: var(--forbidden);
+    font-size: 18px; cursor:pointer; line-height:1;
+    padding: 4px;
+  }
+
+  .row{ display:flex; gap:10px; }
+
+  input[type=text], select{
+    flex:1;
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    outline:none;
+  }
+  input[type=text]:focus, select:focus{ border-color: var(--accent); }
+
+  button{
+    font-family: inherit;
+    cursor:pointer;
+    border:none;
+    border-radius: 10px;
+    font-weight:700;
+    font-size: 15px;
+    transition: transform .08s ease, opacity .15s ease;
+  }
+  button:active{ transform: scale(.97); }
+
+  .btn-primary{
+    background: linear-gradient(135deg, var(--accent), #4a63d6);
+    color:#fff;
+    padding: 13px 22px;
+    width:100%;
+  }
+  .btn-secondary{
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--card-border);
+    padding: 12px 18px;
+  }
+  .btn-add{
+    background: var(--accent);
+    color:#fff;
+    padding: 0 18px;
+  }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .setting-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 16px;
+  }
+  .setting-row label{ font-weight:600; color: var(--text-dim); }
+  .setting-row select{ width: 120px; flex: none; }
+
+  .question-category{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 6px;
+    letter-spacing: .5px;
+  }
+  .question-text{
+    text-align:center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 22px;
+    line-height:1.5;
+  }
+
+  .turn-banner{
+    text-align:center;
+    background: linear-gradient(135deg, rgba(108,140,255,.15), rgba(108,140,255,.05));
+    border: 1px solid rgba(108,140,255,.3);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  .turn-banner .who{
+    font-size: 20px; font-weight: 900; color: var(--accent);
+  }
+  .turn-banner .progress{
+    font-size: 12px; color: var(--text-dim); margin-top:4px;
+  }
+
+  .answer-input{
+    text-align:center;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .results-list{
+    display:flex; flex-direction:column; gap:10px; margin-bottom: 18px;
+  }
+  .result-row{
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--card-border);
+    display:flex; align-items:center; justify-content:space-between; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .result-left{ display:flex; flex-direction:column; gap:4px; }
+  .result-name{ font-weight:700; }
+  .result-answer{ color: var(--text-dim); font-size: 14px; }
+  .badges{ display:flex; gap:6px; flex-wrap:wrap; }
+  .badge{
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .badge.golden{ background: rgba(240,193,75,.18); color: var(--gold); border:1px solid rgba(240,193,75,.4);}
+  .badge.forbidden{ background: rgba(232,93,93,.18); color: var(--forbidden); border:1px solid rgba(232,93,93,.4);}
+  .badge.dup{ background: rgba(154,166,191,.15); color: var(--text-dim); border:1px solid rgba(154,166,191,.3);}
+  .badge.valid{ background: rgba(76,217,168,.15); color: var(--ok); border:1px solid rgba(76,217,168,.3);}
+  .badge.invalid{ background: rgba(232,93,93,.1); color: var(--forbidden); border:1px solid rgba(232,93,93,.25);}
+
+  .score-pill{
+    font-weight: 900;
+    font-size: 16px;
+    min-width: 46px;
+    text-align:center;
+    border-radius: 10px;
+    padding: 6px 10px;
+  }
+  .score-pos{ background: rgba(76,217,168,.15); color: var(--ok); }
+  .score-zero{ background: rgba(154,166,191,.12); color: var(--text-dim); }
+  .score-neg{ background: rgba(232,93,93,.15); color: var(--forbidden); }
+
+  .secret-reveal{
+    text-align:center;
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .secret-reveal b{ color: var(--text); }
+  .secret-reveal .gold-word{ color: var(--gold); font-weight:900; }
+  .secret-reveal .forbidden-word{ color: var(--forbidden); font-weight:900; }
+
+  .leaderboard-row{
+    display:flex; align-items:center; gap:12px;
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--card-border);
+  }
+  .leaderboard-row.winner{
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold) inset;
+  }
+  .rank{
+    width: 30px; height:30px; border-radius:50%;
+    background: var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 900; font-size: 14px;
+    border: 1px solid var(--card-border);
+    flex-shrink:0;
+  }
+  .lb-name{ flex:1; font-weight: 700; }
+  .lb-score{ font-weight: 900; font-size: 18px; color: var(--gold); }
+  .lb-meta{ font-size: 12px; color: var(--text-dim); }
+
+  .trophy{
+    text-align:center; font-size: 50px; margin-bottom: 6px;
+  }
+  .winner-name{
+    text-align:center; font-size: 24px; font-weight: 900; color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .winner-sub{
+    text-align:center; color: var(--text-dim); font-size: 13px; margin-bottom: 18px;
+  }
+
+  .btn-row{ display:flex; gap:10px; margin-top: 6px; }
+  .btn-row > button{ flex:1; }
+
+  .error-text{
+    color: var(--forbidden);
+    font-size: 13px;
+    text-align:center;
+    margin-bottom: 10px;
+    min-height: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ================= DATA =================
+const QUESTIONS = [
+  { category: "اسم دولة أوروبية", text: "اذكر اسم دولة أوروبية",
+    valid: ["إسبانيا","اسبانيا","ألمانيا","المانيا","إيطاليا","ايطاليا","فرنسا","إنجلترا","انجلترا","البرتغال","هولندا","بلجيكا","بولندا","اليونان","السويد","سويسرا","النمسا","ويلز","المجر","هنغاريا","كرواتيا","أيرلندا","ايرلندا","النرويج","الدنمارك","فنلندا"],
+    golden: "ويلز", forbidden: "المجر" },
+
+  { category: "اسم فاكهة", text: "اذكر اسم فاكهة",
+    valid: ["تفاح","موز","برتقال","مانجو","عنب","أناناس","اناناس","فراولة","بطيخ","كيوي","خوخ","كرز","كمثرى","ليمون","بابايا","رمان","تين","مشمش"],
+    golden: "مانجو", forbidden: "ليمون" },
+
+  { category: "لغة برمجة", text: "اذكر اسم لغة برمجة",
+    valid: ["بايثون","python","جافاسكريبت","javascript","جافا","java","سي بلس بلس","c++","سي شارب","c#","روبي","ruby","غو","go","رست","rust","سويفت","swift","كوتلن","kotlin","php","تايبسكريبت","typescript","لوا","lua"],
+    golden: "رست", forbidden: "php" },
+
+  { category: "نادي كرة قدم", text: "اذكر اسم نادي كرة قدم",
+    valid: ["ريال مدريد","برشلونة","مانشستر يونايتد","ليفربول","بايرن ميونخ","يوفنتوس","باريس سان جيرمان","ميلان","ميلانو","تشيلسي","أرسنال","ارسنال","مانشستر سيتي","إنتر ميلان","انتر ميلان","أياكس","اياكس","بوروسيا دورتموند"],
+    golden: "أياكس", forbidden: "تشيلسي" },
+
+  { category: "شخصية من مارفل", text: "اذكر اسم شخصية من مارفل",
+    valid: ["آيرون مان","ايرون مان","سبايدر مان","كابتن أمريكا","كابتن امريكا","ثور","هالك","بلاك ويدو","دكتور سترينج","بلاك بانثر","هوك آي","هوكاي","سكارلت ويتش","فيجن","لوكي","ثانوس","وولفرين"],
+    golden: "لوكي", forbidden: "هوك آي" },
+
+  { category: "اسم حيوان", text: "اذكر اسم حيوان",
+    valid: ["أسد","اسد","نمر","فيل","زرافة","حمار وحشي","فهد","فرس النهر","كنغر","باندا","غوريلا","وحيد القرن","تمساح","كوالا"],
+    golden: "باندا", forbidden: "تمساح" },
+
+  { category: "اسم لون", text: "اذكر اسم لون",
+    valid: ["أحمر","احمر","أزرق","ازرق","أخضر","اخضر","أصفر","اصفر","بنفسجي","برتقالي","وردي","أسود","اسود","أبيض","ابيض","بني","رمادي","سماوي","فيروزي"],
+    golden: "فيروزي", forbidden: "بني" },
+
+  { category: "مدينة عربية", text: "اذكر اسم مدينة عربية",
+    valid: ["القاهرة","عمان","بيروت","دمشق","بغداد","الرياض","دبي","الدوحة","تونس","الجزائر","الدار البيضاء","الخرطوم","مسقط","المنامة"],
+    golden: "مسقط", forbidden: "الخرطوم" },
+
+  { category: "كوكب في المجموعة الشمسية", text: "اذكر اسم كوكب في المجموعة الشمسية",
+    valid: ["عطارد","الزهرة","الأرض","الارض","المريخ","المشتري","زحل","أورانوس","اورانوس","نبتون"],
+    golden: "نبتون", forbidden: "المريخ" },
+
+  { category: "رياضة", text: "اذكر اسم رياضة",
+    valid: ["كرة القدم","كرة السلة","التنس","الكرة الطائرة","السباحة","الملاكمة","الكريكيت","الرغبي","الغولف","الدراجات","كرة اليد","الريشة الطائرة","البادمنتون"],
+    golden: "كرة اليد", forbidden: "الغولف" },
+];
+
+// ================= STATE =================
+let state = {
+  screen: 'setup',
+  playerNames: [],
+  rounds: 5,
+  players: [], // {name, score, goldenCount, cancelledCount}
+  questionOrder: [],
+  currentRound: 0,
+  currentPlayerIndex: 0,
+  currentAnswers: [],
+  lastResults: null,
+  error: ''
+};
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function normalize(str){
+  return str.trim().toLowerCase().replace(/\s+/g,' ');
+}
+
+// ================= SCORING =================
+function computeResults(question, answers){
+  const norms = answers.map(a => normalize(a.text));
+  const goldenNorm = normalize(question.golden);
+  const forbiddenNorm = normalize(question.forbidden);
+  const validSet = question.valid.map(normalize);
+
+  const counts = {};
+  norms.forEach(n => { if(n) counts[n] = (counts[n]||0)+1; });
+
+  return answers.map((a,i) => {
+    const norm = norms[i];
+    const isEmpty = norm === '';
+    const isValid = !isEmpty && validSet.includes(norm);
+    const isDup = !isEmpty && counts[norm] > 1;
+    const isGolden = !isEmpty && norm === goldenNorm;
+    const isForbidden = !isEmpty && norm === forbiddenNorm;
+
+    let score = 0;
+    let cancelled = false;
+
+    if(isForbidden){
+      score = -1;
+    } else if(isValid){
+      if(isDup){
+        if(isGolden){
+          score = 1;
+        } else {
+          score = 0;
+          cancelled = true;
+        }
+      } else {
+        score = isGolden ? 2 : 1;
+      }
+    } else {
+      // invalid answer
+      score = isDup ? -1 : 0;
+    }
+
+    return {
+      playerIndex: a.playerIndex,
+      text: a.text,
+      isValid, isDup, isGolden, isForbidden, isEmpty,
+      score, cancelled
+    };
+  });
+}
+
+// ================= RENDER =================
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  if(state.screen === 'setup') renderSetup(app);
+  else if(state.screen === 'play') renderPlay(app);
+  else if(state.screen === 'reveal') renderReveal(app);
+  else if(state.screen === 'leaderboard') renderLeaderboard(app);
+  else if(state.screen === 'final') renderFinal(app);
+}
+
+function el(tag, props={}, children=[]){
+  const e = document.createElement(tag);
+  Object.entries(props).forEach(([k,v])=>{
+    if(k === 'class') e.className = v;
+    else if(k === 'text') e.textContent = v;
+    else if(k.startsWith('on')) e.addEventListener(k.substring(2).toLowerCase(), v);
+    else e.setAttribute(k, v);
+  });
+  (Array.isArray(children)?children:[children]).forEach(c=>{
+    if(c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+
+// ----- Setup screen -----
+function renderSetup(app){
+  app.appendChild(el('div',{class:'title', text:'🏆 لعبة الإجابات الذهبية والمحظورة'}));
+  app.appendChild(el('div',{class:'subtitle', text:'كل سؤال له إجابة ذهبية (بونص) وإجابة محظورة (عقاب) — سرية حتى الكشف!'}));
+
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{text:'👥 اللاعبون'}));
+
+  const list = el('div',{class:'players-list'});
+  state.playerNames.forEach((name, idx)=>{
+    const row = el('div',{class:'player-row'},[
+      el('div',{class:'num', text: String(idx+1)}),
+      el('span',{class:'pname', text:name}),
+      el('button',{class:'remove-btn', text:'✕', onclick: ()=>{
+        state.playerNames.splice(idx,1);
+        render();
+      }})
+    ]);
+    list.appendChild(row);
+  });
+  card.appendChild(list);
+
+  const inputRow = el('div',{class:'row'});
+  const nameInput = el('input',{type:'text', placeholder:'اسم اللاعب الجديد...'});
+  nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addPlayer(); });
+  const addBtn = el('button',{class:'btn-add', text:'إضافة'});
+  addBtn.addEventListener('click', addPlayer);
+
+  function addPlayer(){
+    const val = nameInput.value.trim();
+    if(!val){ return; }
+    if(state.playerNames.includes(val)){
+      state.error = 'هذا الاسم مستخدم بالفعل';
+      render();
+      return;
+    }
+    state.playerNames.push(val);
+    state.error = '';
+    render();
+  }
+
+  inputRow.appendChild(nameInput);
+  inputRow.appendChild(addBtn);
+  card.appendChild(inputRow);
+  app.appendChild(card);
+
+  // settings
+  const settingsCard = el('div',{class:'card'});
+  settingsCard.appendChild(el('h2',{text:'⚙️ إعدادات اللعبة'}));
+
+  const roundsRow = el('div',{class:'setting-row'});
+  roundsRow.appendChild(el('label',{text:'عدد الأسئلة (الجولات)'}));
+  const select = el('select',{});
+  for(let i=1;i<=QUESTIONS.length;i++){
+    const opt = el('option',{value:i, text:String(i)});
+    if(i === state.rounds) opt.setAttribute('selected','selected');
+    select.appendChild(opt);
+  }
+  select.addEventListener('change', (e)=>{ state.rounds = parseInt(e.target.value); });
+  roundsRow.appendChild(select);
+  settingsCard.appendChild(roundsRow);
+  app.appendChild(settingsCard);
+
+  if(state.error){
+    app.appendChild(el('div',{class:'error-text', text: state.error}));
+  } else {
+    app.appendChild(el('div',{class:'error-text', text: state.playerNames.length < 2 ? 'أضف لاعبين على الأقل (2)' : ''}));
+  }
+
+  const startBtn = el('button',{class:'btn-primary', text:'🚀 ابدأ اللعبة'});
+  startBtn.disabled = state.playerNames.length < 2;
+  startBtn.addEventListener('click', startGame);
+  app.appendChild(startBtn);
+}
+
+function startGame(){
+  state.players = state.playerNames.map(name => ({
+    name, score: 0, goldenCount: 0, cancelledCount: 0
+  }));
+  const order = shuffle([...Array(QUESTIONS.length).keys()]).slice(0, state.rounds);
+  state.questionOrder = order;
+  state.currentRound = 0;
+  state.currentPlayerIndex = 0;
+  state.currentAnswers = [];
+  state.screen = 'play';
+  render();
+}
+
+// ----- Play screen (pass-and-play input) -----
+function renderPlay(app){
+  const qIndex = state.questionOrder[state.currentRound];
+  const question = QUESTIONS[qIndex];
+  const player = state.players[state.currentPlayerIndex];
+
+  app.appendChild(el('div',{class:'title', text:`السؤال ${state.currentRound+1} من ${state.rounds}`}));
+  app.appendChild(el('div',{class:'subtitle', text:'مرر الجهاز للاعب التالي عند طلبه 👇'}));
+
+  const card = el('div',{class:'card'});
+  card.appendChild(el('div',{class:'question-category', text:question.category}));
+  card.appendChild(el('div',{class:'question-text', text:question.text}));
+
+  const banner = el('div',{class:'turn-banner'},[
+    el('div',{class:'who', text:`دور: ${player.name}`}),
+    el('div',{class:'progress', text:`لاعب ${state.currentPlayerIndex+1} من ${state.players.length}`})
+  ]);
+  card.appendChild(banner);
+
+  const input = el('input',{type:'text', class:'answer-input', placeholder:'اكتب إجابتك هنا...'});
+  card.appendChild(input);
+  app.appendChild(card);
+
+  if(state.error){
+    app.appendChild(el('div',{class:'error-text', text: state.error}));
+  } else {
+    app.appendChild(el('div',{class:'error-text', text:''}));
+  }
+
+  const isLast = state.currentPlayerIndex === state.players.length - 1;
+  const submitBtn = el('button',{class:'btn-primary', text: isLast ? '✅ كشف النتائج' : '➡️ التالي'});
+
+  function submit(){
+    const val = input.value;
+    if(!val.trim()){
+      state.error = 'الرجاء كتابة إجابة';
+      render();
+      return;
+    }
+    state.error = '';
+    state.currentAnswers.push({ playerIndex: state.currentPlayerIndex, text: val });
+
+    if(isLast){
+      // compute results
+      state.lastResults = computeResults(question, state.currentAnswers);
+      state.screen = 'reveal';
+    } else {
+      state.currentPlayerIndex += 1;
+    }
+    render();
+  }
+
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
+  submitBtn.addEventListener('click', submit);
+  app.appendChild(submitBtn);
+
+  setTimeout(()=> input.focus(), 0);
+}
+
+// ----- Reveal screen -----
+function renderReveal(app){
+  const qIndex = state.questionOrder[state.currentRound];
+  const question = QUESTIONS[qIndex];
+  const results = state.lastResults;
+
+  app.appendChild(el('div',{class:'title', text:'🎬 الكشف عن النتائج'}));
+  app.appendChild(el('div',{class:'subtitle', text: question.text}));
+
+  const card = el('div',{class:'card'});
+
+  const secret = el('div',{class:'secret-reveal'},[
+    document.createTextNode('الإجابة الذهبية: '),
+    el('span',{class:'gold-word', text: question.golden}),
+    document.createTextNode('   |   الإجابة المحظورة: '),
+    el('span',{class:'forbidden-word', text: question.forbidden}),
+  ]);
+  card.appendChild(secret);
+
+  const list = el('div',{class:'results-list'});
+  results.forEach(r=>{
+    const player = state.players[r.playerIndex];
+    const badges = el('div',{class:'badges'});
+
+    if(r.isEmpty){
+      badges.appendChild(el('span',{class:'badge invalid', text:'بدون إجابة'}));
+    } else {
+      if(r.isForbidden) badges.appendChild(el('span',{class:'badge forbidden', text:'🚫 إجابة محظورة'}));
+      if(r.isGolden) badges.appendChild(el('span',{class:'badge golden', text:'⭐ إجابة ذهبية'}));
+      if(!r.isForbidden){
+        badges.appendChild(el('span',{class: 'badge ' + (r.isValid ? 'valid' : 'invalid'), text: r.isValid ? 'صحيحة' : 'غير صحيحة'}));
+      }
+      if(r.isDup) badges.appendChild(el('span',{class:'badge dup', text:'مكررة'}));
+    }
+
+    const scoreClass = r.score > 0 ? 'score-pos' : (r.score < 0 ? 'score-neg' : 'score-zero');
+    const scoreText = (r.score > 0 ? '+' : '') + r.score;
+
+    const row = el('div',{class:'result-row'},[
+      el('div',{class:'result-left'},[
+        el('div',{class:'result-name', text: player.name}),
+        el('div',{class:'result-answer', text: '«' + r.text + '»'}),
+        badges
+      ]),
+      el('div',{class:'score-pill ' + scoreClass, text: scoreText})
+    ]);
+    list.appendChild(row);
+  });
+  card.appendChild(list);
+  app.appendChild(card);
+
+  const nextBtn = el('button',{class:'btn-primary', text: state.currentRound === state.rounds - 1 ? '🏁 عرض النتيجة النهائية' : '📊 عرض الترتيب الحالي'});
+  nextBtn.addEventListener('click', ()=>{
+    // apply scores
+    results.forEach(r=>{
+      const p = state.players[r.playerIndex];
+      p.score += r.score;
+      if(r.isGolden) p.goldenCount += 1;
+      if(r.cancelled) p.cancelledCount += 1;
+    });
+    state.screen = (state.currentRound === state.rounds - 1) ? 'final' : 'leaderboard';
+    render();
+  });
+  app.appendChild(nextBtn);
+}
+
+// ----- Leaderboard (between rounds) -----
+function renderLeaderboard(app){
+  app.appendChild(el('div',{class:'title', text:'📊 الترتيب الحالي'}));
+  app.appendChild(el('div',{class:'subtitle', text: `بعد السؤال ${state.currentRound+1} من ${state.rounds}`}));
+
+  const card = el('div',{class:'card'});
+  const sorted = [...state.players].sort((a,b)=> b.score - a.score);
+  sorted.forEach((p, idx)=>{
+    const row = el('div',{class:'leaderboard-row'},[
+      el('div',{class:'rank', text: String(idx+1)}),
+      el('div',{class:'lb-name'},[
+        el('div',{text: p.name}),
+        el('div',{class:'lb-meta', text: `⭐ ${p.goldenCount}  •  ملغية ${p.cancelledCount}`})
+      ]),
+      el('div',{class:'lb-score', text: String(p.score)})
+    ]);
+    card.appendChild(row);
+  });
+  app.appendChild(card);
+
+  const nextBtn = el('button',{class:'btn-primary', text:'➡️ السؤال التالي'});
+  nextBtn.addEventListener('click', ()=>{
+    state.currentRound += 1;
+    state.currentPlayerIndex = 0;
+    state.currentAnswers = [];
+    state.lastResults = null;
+    state.screen = 'play';
+    render();
+  });
+  app.appendChild(nextBtn);
+}
+
+// ----- Final screen -----
+function renderFinal(app){
+  app.appendChild(el('div',{class:'title', text:'🏆 النتيجة النهائية'}));
+
+  // determine winners with tie-break
+  const maxScore = Math.max(...state.players.map(p=>p.score));
+  let topPlayers = state.players.filter(p=>p.score === maxScore);
+
+  if(topPlayers.length > 1){
+    const maxGolden = Math.max(...topPlayers.map(p=>p.goldenCount));
+    topPlayers = topPlayers.filter(p=>p.goldenCount === maxGolden);
+  }
+  if(topPlayers.length > 1){
+    const minCancelled = Math.min(...topPlayers.map(p=>p.cancelledCount));
+    topPlayers = topPlayers.filter(p=>p.cancelledCount === minCancelled);
+  }
+
+  app.appendChild(el('div',{class:'trophy', text:'🏆'}));
+  if(topPlayers.length === 1){
+    app.appendChild(el('div',{class:'winner-name', text: `الفائز: ${topPlayers[0].name}`}));
+  } else {
+    app.appendChild(el('div',{class:'winner-name', text: `تعادل بين: ${topPlayers.map(p=>p.name).join(' و ')}`}));
+  }
+  app.appendChild(el('div',{class:'winner-sub', text:'يتم حسم التعادل بعدد الإجابات الذهبية ثم بعدد الإجابات الملغية (الأقل أفضل)'}));
+
+  const card = el('div',{class:'card'});
+  const sorted = [...state.players].sort((a,b)=>{
+    if(b.score !== a.score) return b.score - a.score;
+    if(b.goldenCount !== a.goldenCount) return b.goldenCount - a.goldenCount;
+    return a.cancelledCount - b.cancelledCount;
+  });
+  sorted.forEach((p, idx)=>{
+    const isWinner = topPlayers.includes(p);
+    const row = el('div',{class:'leaderboard-row' + (isWinner ? ' winner' : '')},[
+      el('div',{class:'rank', text: String(idx+1)}),
+      el('div',{class:'lb-name'},[
+        el('div',{text: p.name + (isWinner ? ' 👑' : '')}),
+        el('div',{class:'lb-meta', text: `⭐ ذهبية: ${p.goldenCount}  •  ملغية: ${p.cancelledCount}`})
+      ]),
+      el('div',{class:'lb-score', text: String(p.score)})
+    ]);
+    card.appendChild(row);
+  });
+  app.appendChild(card);
+
+  const restartBtn = el('button',{class:'btn-primary', text:'🔄 لعبة جديدة'});
+  restartBtn.addEventListener('click', ()=>{
+    state = {
+      screen: 'setup',
+      playerNames: state.players.map(p=>p.name),
+      rounds: state.rounds,
+      players: [],
+      questionOrder: [],
+      currentRound: 0,
+      currentPlayerIndex: 0,
+      currentAnswers: [],
+      lastResults: null,
+      error: ''
+    };
+    render();
+  });
+  app.appendChild(restartBtn);
+}
+
+render();
+</script>
+</body>
+</html>
